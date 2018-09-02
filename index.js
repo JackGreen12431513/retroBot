@@ -16,7 +16,7 @@ const prefix = "retro "
 Client.login(process.env.retro)
 
 Client.on('ready', () => {
-
+    Client.user.setActivity("retro help")
 })
 
 Client.on('message', message => {
