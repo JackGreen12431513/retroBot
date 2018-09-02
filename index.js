@@ -66,6 +66,7 @@ Client.on('message', message => {
             .setTitle("Retro Commands")
             .addField(`🤔 General`, '`retro help general`', true)
             .addField(`📷 Image`, '`retro help image`', true)
+            .addField(`🎮 Gaming`, `retro help gaming`)
             .addField('🛠 Utility', '`retro help util`', true)
             .addField('🔨 Moderation', '`retro help moderation`', true)
             .setColor(0xFBE701)
@@ -90,7 +91,31 @@ Client.on('message', message => {
             .addField(`🔨 Moderation`, 'ban, kick, warn')
             .setColor(0xFBE701)
             message.channel.send(moderationHelpEmb);
+        } else if (args[1] == "gaming") {
+            var gamingHelpEmb = new Discord.RichEmbed()
+            .addField(`🎮 Gaming`, 'rsprofile')
+            .setColor(0xFBE701)
+            message.channel.send(gamingHelpEmb);
         }
+        break;
+
+        case "rsprofile":
+        request(`https://apps.runescape.com/runemetrics/profile/profile?user=${message.content.replace(prefix + "rsprofile", "").replace(" ", "")}&activities=20`, function (error, response, body) {
+        var profileObj = JSON.parse(body);
+        if (profileObj.error == "NO_PROFILE") {
+            var rsNoProfileEmb = new Discord.RichEmbed()
+            .addField("User not found!", `User '${message.content.replace(prefix + "rsprofile", "").replace(" ", "")}' not found!`)
+            .setColor(0xFBE701)
+            message.channel.send(rsNoProfileEmb);
+        } else {
+            var rsProfileEmb = new Discord.RichEmbed()
+            .setAuthor(`${profileObj.name}'s Profile`)
+            .addField("General", `Magic: ${profileObj.magic}\nRank: ${profileObj.rank}\nTotal XP: ${profileObj.totalxp}`)
+            .addField("Quests", `Quests Started: ${profileObj.questsstarted}\nQuests Completed: ${profileObj.questscomplete}`)
+            .setColor(0xFBE701)
+            message.channel.send(rsProfileEmb);
+        }
+});
         break;
 
         case "binfo":
@@ -204,3 +229,14 @@ function writeGuild() {
 function writeData() {
     fs.writeFileSync('userData.json', JSON.stringify(userData));
 }
+
+const express = require('express')
+const path = require('path')
+const PORT = process.env.PORT || 5000
+
+express()
+  .use(express.static(path.join(__dirname, 'public')))
+  .set('views', path.join(__dirname, 'views'))
+  .set('view engine', 'ejs')
+  .get('/', (req, res) => res.render('pages/index'))
+.listen(PORT, () => console.log(`Listening on ${ PORT }`))
