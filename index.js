@@ -66,9 +66,10 @@ Client.on('message', message => {
             .setTitle("Retro Commands")
             .addField(`🤔 General`, '`retro help general`', true)
             .addField(`📷 Image`, '`retro help image`', true)
-            .addField(`🎮 Gaming`, `retro help gaming`)
+            .addField(`🎮 Gaming`, '`retro help gaming`', true)
             .addField('🛠 Utility', '`retro help util`', true)
             .addField('🔨 Moderation', '`retro help moderation`', true)
+            .addField('⚙ Settings', '`retro help settings`', true)
             .setColor(0xFBE701)
             message.channel.send(helpEmb);
         } else if (args[1] == "general") {
@@ -93,10 +94,19 @@ Client.on('message', message => {
             message.channel.send(moderationHelpEmb);
         } else if (args[1] == "gaming") {
             var gamingHelpEmb = new Discord.RichEmbed()
-            .addField(`🎮 Gaming`, 'rsprofile')
+            .addField(`🎮 Gaming`, 'rsprofile, rblxprofile')
             .setColor(0xFBE701)
             message.channel.send(gamingHelpEmb);
+        } else if (args[1] == "settings") {
+            var settingsHelpEmb = new Discord.RichEmbed()
+            .addField(`⚙ Settings`, 'restart')
+            .setColor(0xFBE701)
+            message.channel.send(settingsHelpEmb);
         }
+        break;
+
+        case "restart":
+        resetBot(message.channel);
         break;
 
         case "rsprofile":
@@ -115,7 +125,23 @@ Client.on('message', message => {
             .setColor(0xFBE701)
             message.channel.send(rsProfileEmb);
         }
-});
+        })
+        break;
+
+        case "rblxprofile":
+        var userRAP = 0;
+        request(`https://api.roblox.com/users/get-by-username?username=${message.content.replace(prefix + "rblxprofile", "").replace(" ", "")}`, function (error, response, userBody) {
+            var userObj = JSON.parse(userBody);
+                request(`https://pa.developer-variety.com/api/AccountRap.php?username=${message.content.replace(prefix + "rblxprofile", "").replace(" ", "")}`, function (error1, response1, RAPbody) {
+                    var RapObj = JSON.parse(RAPbody)
+                    var userEmb = new Discord.RichEmbed()
+                    .setAuthor(`${message.content.replace(prefix + "rblxprofile", "").replace(" ", "")}'s profile`)
+                    .addField(`General`, `ID: ${userObj.Id}`)
+                    .addField(`Trading`, `RAP: ${RapObj.rap}`)
+                    .setColor(0xFBE701)
+                    message.channel.send(userEmb);
+                })
+        })
         break;
 
         case "binfo":
@@ -240,3 +266,10 @@ express()
   .set('view engine', 'ejs')
   .get('/', (req, res) => res.render('pages/index'))
 .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+
+function resetBot(channel) {
+    channel.send('Resetting...')
+    .then(msg => Client.destroy())
+    .then(() => Client.login(process.env.retro))
+    .then(channel.send("Reset!"));
+}
